@@ -12,13 +12,13 @@ export const semester = {
 };
 
 // Bảng khung giờ theo tiết. Mỗi tiết học 50 phút, nghỉ 5 phút rồi vào tiết mới.
-// (Buổi sáng: tiết 1–5 từ 07:00. Buổi chiều: tiết 6–10 từ 13:00.)
+// (Buổi sáng: tiết 1–5 từ 06:50. Buổi chiều: tiết 6–10 từ 13:00.)
 export const periodTimes = {
-  1:  { start: '07:00', end: '07:50' },
-  2:  { start: '07:55', end: '08:45' },
-  3:  { start: '08:50', end: '09:40' },
-  4:  { start: '09:45', end: '10:35' },
-  5:  { start: '10:40', end: '11:30' },
+  1:  { start: '06:50', end: '07:40' },
+  2:  { start: '07:45', end: '08:35' },
+  3:  { start: '08:40', end: '09:30' },
+  4:  { start: '09:35', end: '10:25' },
+  5:  { start: '10:30', end: '11:20' },
   6:  { start: '13:00', end: '13:50' },
   7:  { start: '13:55', end: '14:45' },
   8:  { start: '14:50', end: '15:40' },
