@@ -1,0 +1,97 @@
+/* ================= MASCOTS ================= */
+.mascot { display: block; width: 100%; height: auto; overflow: visible; }
+.mascot-shadow { fill: rgba(124, 84, 45, 0.16); }
+
+/* ---- Bear (trong CoupleHug) ---- */
+/* thở nhẹ + tiny happy bounce khi ôm */
+.hug-bear { transform-origin: 50% 92%; animation: bear-breathe 4.6s ease-in-out infinite; }
+@keyframes bear-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2.5px) scale(1.015); }
+}
+.hug-bear-head { transform-origin: 160px 96px; animation: bear-nuzzle 8s ease-in-out infinite; }
+@keyframes bear-nuzzle {
+  0%, 55%, 100% { transform: rotate(0) translateY(0); }
+  70%, 85% { transform: rotate(2.4deg) translateY(2px); } /* cúi đầu về phía cún */
+}
+.bear-eyes { transform-origin: center; animation: blink 6.5s ease-in-out infinite; }
+.couplehug .blush { animation: blush-glow 6s ease-in-out infinite; }
+@keyframes blush-glow { 0%,100% { opacity: 0.5; } 50% { opacity: 0.78; } }
+.bear-smile { transform-origin: 160px 104px; animation: smile-pulse 8s ease-in-out infinite; }
+@keyframes smile-pulse { 0%,60%,100% { transform: scaleX(1); } 75% { transform: scaleX(1.12); } }
+
+/* ---- Puppy (cuộn vào lòng gấu, cuddle closer) ---- */
+.hug-puppy { transform-origin: 50% 100%; animation: puppy-cuddle 8s ease-in-out infinite; }
+@keyframes puppy-cuddle {
+  0%, 45%, 100% { transform: translateY(0) rotate(0); }
+  65%, 82% { transform: translateY(3px) rotate(-1.5deg); } /* rúc sát vào hơn */
+}
+.hug-puppy-head { transform-origin: 160px 172px; animation: puppy-tilt 7s ease-in-out infinite; }
+@keyframes puppy-tilt { 0%,100% { transform: rotate(0); } 40% { transform: rotate(-2.2deg); } 75% { transform: rotate(1.6deg); } }
+.puppy-eyes { transform-origin: center; animation: blink 4.8s ease-in-out infinite; }
+.puppy-ear-l { transform-origin: 118px 128px; animation: ear-wiggle 3.6s ease-in-out infinite; }
+.puppy-ear-r { transform-origin: 202px 128px; animation: ear-wiggle 3.6s ease-in-out infinite reverse; }
+@keyframes ear-wiggle { 0%,100% { transform: rotate(0); } 50% { transform: rotate(4deg); } }
+.puppy-tail { transform-origin: 212px 196px; animation: tail-wag 0.65s ease-in-out infinite; }
+@keyframes tail-wag { 0%,100% { transform: rotate(-13deg); } 50% { transform: rotate(15deg); } }
+.puppy-tongue { transform-origin: 160px 182px; animation: pant 1.8s ease-in-out infinite; }
+@keyframes pant { 0%,100% { transform: scaleY(0.75); } 50% { transform: scaleY(1.1); } }
+
+/* tay gấu siết ôm nhẹ theo nhịp */
+.hug-arm-l { transform-origin: 108px 150px; animation: hug-squeeze-l 8s ease-in-out infinite; }
+.hug-arm-r { transform-origin: 212px 150px; animation: hug-squeeze-r 8s ease-in-out infinite; }
+@keyframes hug-squeeze-l { 0%,55%,100% { transform: rotate(0); } 72%,85% { transform: rotate(3deg); } }
+@keyframes hug-squeeze-r { 0%,55%,100% { transform: rotate(0); } 72%,85% { transform: rotate(-3deg); } }
+
+/* Zzz khi ngủ */
+.sleep-z { opacity: 0; transform-origin: 230px 26px; animation: zzz 4s ease-in-out infinite; }
+@keyframes zzz {
+  0% { opacity: 0; transform: translateY(6px) scale(0.7); }
+  40% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-14px) scale(1.1); }
+}
+
+/* chớp mắt dùng chung */
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95%, 97% { transform: scaleY(0.12); }
+}
+
+/* ================= SCENE / COUPLE ================= */
+.mascot-scene { position: relative; width: 100%; }
+.couple { position: relative; width: 100%; display: flex; justify-content: center; }
+.couple .couplehug { width: 100%; max-width: 320px; }
+
+/* rest (ngày nghỉ) — thu nhỏ, hơi nghiêng như đang cuộn vào nhau ngủ */
+.mascot-scene--rest .couplehug { max-width: 170px; }
+.couple--sleep { transform: rotate(-2deg); }
+
+/* ================= PINK HEART PARTICLES ================= */
+.hearts { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.heart {
+  position: absolute;
+  left: var(--hx, 50%);
+  bottom: 34%;
+  opacity: 0;
+  filter: drop-shadow(0 2px 3px rgba(224, 138, 160, 0.25));
+  animation: heart-rise 12s ease-in-out infinite;
+  animation-delay: var(--hd, 0s);
+  will-change: transform, opacity;
+}
+.heart svg { display: block; width: 100%; height: 100%; }
+.heart.h-tiny { width: 11px; height: 10px; }
+.heart.h-sm   { width: 16px; height: 15px; }
+.heart.h-md   { width: 23px; height: 21px; }
+/* pastel pink palette — không neon */
+.heart.h-tiny svg path { fill: #f5b9c9; }
+.heart.h-sm   svg path { fill: #f0a6bd; }
+.heart.h-md   svg path { fill: #ee9bb4; }
+
+/* trái tim xuất hiện thưa: chỉ "sống" ~30% chu kỳ rồi ẩn dài */
+@keyframes heart-rise {
+  0%, 4%   { opacity: 0; transform: translateY(4px) scale(0.4) rotate(-8deg); }
+  10%      { opacity: 0.95; transform: translateY(-14px) scale(1) rotate(4deg); }
+  22%      { opacity: 0.85; transform: translateY(-46px) scale(0.95) rotate(-6deg); }
+  32%      { opacity: 0; transform: translateY(-74px) scale(0.7) rotate(6deg); }
+  100%     { opacity: 0; transform: translateY(-74px) scale(0.7); }
+}

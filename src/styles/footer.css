@@ -1,0 +1,42 @@
+/* ================= FOOTER SUNSET SCENE ================= */
+.footer-scene {
+  position: relative;
+  margin-top: 56px;
+  height: 220px;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-sm);
+}
+.footer-scene__sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #f6d9c4 0%, #f7c9c0 38%, #f4b7bd 66%, #e9c9b0 100%);
+}
+.footer-sun {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 130px;
+  height: 130px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,240,205,0.98) 0%, rgba(249,205,150,0.75) 45%, transparent 72%);
+  filter: blur(1px);
+}
+/* dải mây/đồi mờ */
+.footer-scene__sky::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 42%;
+  background: radial-gradient(120% 90% at 50% 120%, rgba(197,221,180,0.85), rgba(197,221,180,0) 70%);
+}
+.footer-scene__couple {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 210px;
+}
+.footer-scene--dummy {}

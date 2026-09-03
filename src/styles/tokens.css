@@ -1,0 +1,74 @@
+/* ============================================================
+   DESIGN TOKENS — Cozy Anime University
+   ============================================================ */
+:root {
+  /* Warm neutral base */
+  --cream: #fbf3e6;
+  --cream-2: #f6e8d3;
+  --beige: #efd9bd;
+  --warm-white: #fffdf8;
+  --paper: #fdf6ea;
+
+  /* Brown family — visual anchor (Brown Bear) */
+  --brown-900: #4a3220;
+  --brown-700: #6f4e2e;
+  --brown-500: #a4753f;
+  --brown-300: #d8b285;
+
+  /* Text */
+  --ink: #4a3826;
+  --ink-soft: #7a6650;
+  --ink-faint: #a08a70;
+
+  /* Pastel accents (dịu, không neon) */
+  --peach: #f6c9a8;   --peach-ink: #b76a41;
+  --sky: #b9d9ef;     --sky-ink: #4d84ad;
+  --sage: #c3ddb4;    --sage-ink: #5e8b4b;
+  --lilac: #d6cbee;   --lilac-ink: #7d67b1;
+  --honey: #f4dfa0;   --honey-ink: #b18a2e;
+  --rose: #f2c4c9;    --rose-ink: #c06a76;
+
+  /* Love accents — pink tinh tế (accent, không phủ toàn UI) */
+  --pink: #f4b8c9;
+  --pink-soft: #fbe3ea;
+  --pink-ink: #cf6f8a;
+  --pink-glow: rgba(240, 166, 189, 0.45);
+
+  /* Sky gradient */
+  --sky-top: #d9ecf7;
+  --sky-mid: #f3e4ef;
+  --sky-bot: #fdeede;
+
+  /* Surfaces */
+  --surface: rgba(255, 253, 248, 0.82);
+  --surface-solid: #fffdf8;
+  --border: rgba(164, 117, 63, 0.16);
+  --border-strong: rgba(164, 117, 63, 0.28);
+
+  /* Shadows — soft, warm */
+  --sh-sm: 0 4px 14px rgba(124, 84, 45, 0.10);
+  --sh-md: 0 10px 30px rgba(124, 84, 45, 0.14);
+  --sh-lg: 0 22px 50px rgba(124, 84, 45, 0.18);
+
+  /* Radius */
+  --r-sm: 14px;
+  --r-md: 20px;
+  --r-lg: 28px;
+  --r-xl: 36px;
+
+  /* Type */
+  --font-display: 'Baloo 2', 'Nunito', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+/* Accent helper: mỗi phần tử .accent-x cấp --a (nền) và --ai (chữ) */
+.accent-peach { --a: var(--peach); --ai: var(--peach-ink); }
+.accent-sky   { --a: var(--sky);   --ai: var(--sky-ink); }
+.accent-sage  { --a: var(--sage);  --ai: var(--sage-ink); }
+.accent-lilac { --a: var(--lilac); --ai: var(--lilac-ink); }
+.accent-honey { --a: var(--honey); --ai: var(--honey-ink); }
+.accent-rose  { --a: var(--rose);  --ai: var(--rose-ink); }

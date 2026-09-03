@@ -1,0 +1,84 @@
+/* ================= CLASS MODAL ================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(74, 50, 32, 0.34);
+  backdrop-filter: blur(6px);
+  animation: overlay-in 0.25s var(--ease);
+}
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  position: relative;
+  width: min(440px, 100%);
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 28px 26px 24px;
+  box-shadow: var(--sh-lg);
+  overflow: hidden;
+  animation: modal-in 0.36s var(--ease-soft);
+}
+@keyframes modal-in { from { opacity: 0; transform: translateY(20px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+.modal__glow {
+  position: absolute;
+  top: -60px; right: -40px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: var(--a);
+  opacity: 0.28;
+  filter: blur(10px);
+}
+.modal__close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 34px; height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  color: var(--brown-700);
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: var(--sh-sm);
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+}
+.modal__close:hover { transform: rotate(90deg); background: #fff; }
+
+.modal__badge {
+  position: relative;
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--a) 55%, white);
+  color: var(--ai);
+}
+.modal__title {
+  position: relative;
+  margin-top: 12px;
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 800;
+  color: var(--brown-700);
+  line-height: 1.14;
+}
+
+.modal__rows { position: relative; margin-top: 20px; display: flex; flex-direction: column; gap: 2px; }
+.modal__row {
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 4px;
+  border-bottom: 1px dashed var(--border);
+}
+.modal__row:last-child { border-bottom: none; }
+.modal__row-icon { font-size: 1rem; }
+.modal__row-label { font-weight: 700; color: var(--ink-soft); font-size: 0.9rem; }
+.modal__row-value { font-family: var(--font-display); font-weight: 700; color: var(--brown-700); font-size: 0.95rem; text-align: right; }

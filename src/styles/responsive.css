@@ -1,0 +1,98 @@
+/* ================= RESPONSIVE ================= */
+
+/* Tablet: 7 cột → 4, hero xếp dọc */
+@media (max-width: 1080px) {
+  .week-grid { grid-template-columns: repeat(4, 1fr); }
+  .summary { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; text-align: center; }
+  .hero__text { display: flex; flex-direction: column; align-items: stretch; order: 2; }
+  .hero__greet, .hero__semester { text-align: center; }
+  .hero__pills, .hero__semcard { align-self: center; }
+  .hero__art { order: 1; max-width: 340px; margin: 0 auto; }
+  .week-grid { grid-template-columns: repeat(3, 1fr); }
+  .summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mobile: bỏ lưới ngày, dùng day-picker + 1 ngày */
+@media (max-width: 620px) {
+  .week-grid { display: none; }
+  .week-single { display: block; }
+  .day-picker { display: flex; }
+  .week-single .day-col { min-height: auto; }
+  .week-single .day-col__body { gap: 12px; }
+  .weekly__head { align-items: center; }
+  .weekly__nav { width: 100%; justify-content: space-between; }
+  .wk-btn { padding: 10px 18px; } /* touch target lớn hơn */
+  .wk-btn span { display: none; }
+
+  /* ---- HERO gọn lại: mascot nhỏ vừa, đưa nội dung lên nhanh ---- */
+  .hero { padding: 6px 0 18px; gap: 4px; }
+  .hero__art { order: 1; max-width: 210px; margin: 0 auto; }
+  .hero__art::before { height: 26px; }
+  .hero__text { gap: 0; }
+  .hero__greet { margin-bottom: 2px; }
+  .hero__title { font-size: clamp(1.85rem, 8.4vw, 2.5rem); }
+  .hero__semester { margin-top: 6px; }
+  .hero__pills { margin-top: 12px; padding: 9px 18px; }
+  .hero__semcard {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: stretch;
+    gap: 16px;
+    margin-top: 14px;
+    padding: 11px 16px;
+    box-sizing: border-box;
+  }
+  .hero__semcard > div:not(.hero__semcard-sep) { align-items: center; flex: 1 1 0; min-width: 0; }
+  .hero__semcard-label { font-size: 0.66rem; }
+  .hero__semcard-value { font-size: 0.86rem; }
+  .hero__semcard > .hero__semcard-sep { display: block; flex: 0 0 1px; }
+
+  .summary { gap: 12px; margin: 4px 0 30px; }
+  .stat-card { border-radius: 22px; }
+  .stat-card__value { font-size: 2.1rem; }
+
+  /* Hearts nhẹ hơn: nhỏ + ít hơn, không che nội dung */
+  .heart.h-md { display: none; }
+  .heart.h-tiny { width: 9px; height: 8px; }
+  .heart.h-sm { width: 13px; height: 12px; }
+
+  /* day-picker: ẩn thanh cuộn cho gọn */
+  .day-picker { scrollbar-width: none; }
+  .day-picker::-webkit-scrollbar { display: none; }
+
+  /* footer scene thấp hơn cho vừa mobile */
+  .footer-scene { height: 170px; margin-top: 40px; }
+  .footer-scene__couple { width: 168px; }
+}
+
+/* iPhone 11 & nhỏ hơn — tinh chỉnh cuối */
+@media (max-width: 430px) {
+  .hero__art { max-width: 196px; }
+  .hero__semcard { gap: 12px; padding: 10px 12px; }
+  .hero__pills { flex-wrap: wrap; justify-content: center; }
+  .day-col__body { gap: 12px; }
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .bg-clouds, .bg-sun, .bg-tree, .sparkle, .heart,
+  .hug-bear, .hug-bear-head, .hug-puppy, .hug-puppy-head,
+  .hug-arm-l, .hug-arm-r, .puppy-tail, .puppy-ear-l, .puppy-ear-r,
+  .bear-eyes, .puppy-eyes, .sleep-z, .bear-smile, .couplehug .blush {
+    animation: none !important;
+  }
+  .heart { opacity: 0 !important; } /* tắt hearts khi giảm chuyển động */
+  [data-depth] { transform: none !important; }
+}
