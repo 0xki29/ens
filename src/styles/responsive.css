@@ -10,7 +10,8 @@
   .hero { grid-template-columns: 1fr; text-align: center; }
   .hero__text { display: flex; flex-direction: column; align-items: stretch; order: 2; }
   .hero__greet, .hero__semester { text-align: center; }
-  .hero__pills, .hero__semcard { align-self: center; }
+  /* xếp 2 frame theo cột, căn giữa khi màn hình hẹp */
+  .hero__meta { flex-direction: column; align-items: center; gap: 12px; }
   .hero__art { order: 1; max-width: 340px; margin: 0 auto; }
   .week-grid { grid-template-columns: repeat(3, 1fr); }
   .summary { grid-template-columns: repeat(2, 1fr); }
@@ -36,14 +37,14 @@
   .hero__greet { margin-bottom: 2px; }
   .hero__title { font-size: clamp(1.85rem, 8.4vw, 2.5rem); }
   .hero__semester { margin-top: 6px; }
-  .hero__pills { margin-top: 12px; padding: 9px 18px; }
+  .hero__meta { margin-top: 14px; width: 100%; }
+  .hero__pills { padding: 9px 18px; }
   .hero__semcard {
     display: flex;
     width: 100%;
     justify-content: center;
     align-items: stretch;
     gap: 16px;
-    margin-top: 14px;
     padding: 11px 16px;
     box-sizing: border-box;
   }

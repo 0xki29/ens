@@ -17,21 +17,23 @@ export default function Hero() {
         <h1 className="hero__title reveal">Your University Life</h1>
         <p className="hero__semester reveal">{semester.title}</p>
 
-        <div className="hero__pills reveal">
-          <span className="hero__pill"><b>{totalSubjects}</b> môn</span>
-          <span className="hero__pill-dot" aria-hidden="true">·</span>
-          <span className="hero__pill"><b>{totalCredits}</b> tín chỉ</span>
-        </div>
-
-        <div className="hero__semcard reveal">
-          <div>
-            <span className="hero__semcard-label">Học kỳ</span>
-            <span className="hero__semcard-value">{semester.shortTitle}</span>
+        <div className="hero__meta reveal">
+          <div className="hero__pills">
+            <span className="hero__pill"><b>{totalSubjects}</b> môn</span>
+            <span className="hero__pill-dot" aria-hidden="true">·</span>
+            <span className="hero__pill"><b>{totalCredits}</b> tín chỉ</span>
           </div>
-          <div className="hero__semcard-sep" />
-          <div>
-            <span className="hero__semcard-label">Bắt đầu</span>
-            <span className="hero__semcard-value">{semester.startLabel}</span>
+
+          <div className="hero__semcard">
+            <div>
+              <span className="hero__semcard-label">Học kỳ</span>
+              <span className="hero__semcard-value">{semester.shortTitle}</span>
+            </div>
+            <div className="hero__semcard-sep" />
+            <div>
+              <span className="hero__semcard-label">Bắt đầu</span>
+              <span className="hero__semcard-value">{semester.startLabel}</span>
+            </div>
           </div>
         </div>
       </div>
