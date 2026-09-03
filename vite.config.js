@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   // GitHub Pages project page: served tại https://<username>.github.io/ens/
-  base: '/enschoo/',
+  base: '/ens/',
   plugins: [react()],
   server: { host: true, port: 5173 }
 })
