@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HUS :: TKB SYSTEM v2.0.26 // 24002011</title>
+<style id="app-css">
+/* ============================================================
+   HUS - TKB SYSTEM v2.0.26  ::  single file, zero dependency
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0a0a0a;
+  --bg-panel:rgba(6,14,9,.72);
+  --bg-panel-2:rgba(8,18,12,.55);
+  --grn:#00ff41;
+  --grn-dim:#0bb534;
+  --red:#ff073a;
+  --cyan:#00e5ff;
+  --amber:#ffb800;
+  --magenta:#ff2fd0;
+  --violet:#a855f7;
+  --txt:#b8ffc9;
+  --mut:#4e8a60;
+  --line:rgba(0,255,65,.16);
+  --line-s:rgba(0,255,65,.30);
+  --rh:58px;
+  --mono:"JetBrains Mono","Fira Code","Cascadia Code","SF Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono",monospace;
+}
+
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--grn);
+  font-family:var(--mono);
+  font-size:14px;
+  line-height:1.45;
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::after{ /* vignette */
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:3;
+  background:radial-gradient(ellipse at 50% 40%,transparent 45%,rgba(0,0,0,.78) 100%);
+}
+
+/* ---------- background layers ---------- */
+#matrix{position:fixed;inset:0;z-index:0;opacity:.15;pointer-events:none}
+.scan{
+  position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(180deg,rgba(0,255,65,.045) 0 1px,transparent 1px 3px);
+}
+.scan::before{
+  content:"";position:absolute;left:0;right:0;height:110px;
+  background:linear-gradient(180deg,transparent,rgba(0,255,65,.055),transparent);
+  animation:sweep 7s linear infinite;
+}
+@keyframes sweep{0%{top:-15%}100%{top:115%}}
+
+/* ---------- boot overlay ---------- */
+#boot{
+  position:fixed;inset:0;z-index:99;background:#050805;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  font-size:12px;color:var(--grn-dim);letter-spacing:.5px;
+  transition:opacity .45s ease,visibility .45s;
+}
+#boot.off{opacity:0;visibility:hidden}
+#bootlog{width:min(560px,88vw);white-space:pre-wrap}
+#bootlog b{color:var(--grn);font-weight:400}
+
+/* ---------- layout ---------- */
+.wrap{position:relative;z-index:4;max-width:1400px;margin:0 auto;padding:22px 16px 60px}
+.panel{
+  border:1px solid var(--line);
+  background:var(--bg-panel);
+  backdrop-filter:blur(3px);
+  position:relative;
+}
+.panel::before,.panel::after{
+  content:"";position:absolute;width:9px;height:9px;border:1px solid var(--grn);opacity:.75
+}
+.panel::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.panel::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+
+.reveal{opacity:1;animation:fadeUp .55s cubic-bezier(.2,.7,.3,1) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- header ---------- */
+header{padding:18px 16px 14px;margin-bottom:14px;overflow:hidden}
+.ascii{
+  white-space:pre;font-size:clamp(4.4px,1.72vw,13px);line-height:1.06;font-weight:700;
+  background:linear-gradient(92deg,#00ff41,#00e5ff,#a855f7,#ff2fd0,#ffb800,#00ff41);
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 7px rgba(0,255,65,.45));
+  animation:hueslide 9s linear infinite;
+  text-align:center;
+}
+@keyframes hueslide{to{background-position:220% 0}}
+
+.hbar{
+  display:flex;flex-wrap:wrap;gap:10px 18px;align-items:baseline;justify-content:center;
+  margin-top:12px;padding-top:11px;border-top:1px dashed var(--line-s);
+}
+.glitch{position:relative;display:inline-block;font-size:clamp(13px,2.4vw,19px);letter-spacing:3px;color:var(--grn);text-shadow:0 0 10px rgba(0,255,65,.5)}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;inset:0;background:var(--bg);overflow:hidden}
+.glitch::before{color:var(--cyan);clip-path:inset(0 0 58% 0);animation:gA 2.8s infinite steps(2,end) alternate-reverse}
+.glitch::after{color:var(--red);clip-path:inset(56% 0 0 0);animation:gB 2.1s infinite steps(2,end) alternate-reverse}
+@keyframes gA{0%,88%{transform:translate(0)}90%{transform:translate(-3px,-1px)}94%{transform:translate(2px,1px)}100%{transform:translate(-1px,0)}}
+@keyframes gB{0%,86%{transform:translate(0)}88%{transform:translate(3px,1px)}93%{transform:translate(-2px,-1px)}100%{transform:translate(1px,0)}}
+.hmeta{font-size:11.5px;color:var(--mut);letter-spacing:1px}
+.hmeta span{color:var(--cyan)}
+
+/* ---------- terminal ---------- */
+.term{padding:14px 16px;margin-bottom:14px;font-size:13px;overflow:hidden}
+.tline{white-space:pre-wrap;word-break:break-word}
+.prompt{color:var(--cyan)}
+.prompt i{color:var(--magenta);font-style:normal}
+.out{color:var(--txt);padding-left:2px}
+.out .k{color:var(--grn-dim)}
+.out .v{color:var(--grn)}
+.out .hot{color:var(--amber)}
+.caret{display:inline-block;width:8px;background:var(--grn);color:transparent;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:14px}
+.stat{padding:10px 12px;border-left:3px solid var(--sc,var(--grn));transition:transform .2s ease,box-shadow .2s ease}
+.stat:hover{transform:translateY(-2px);box-shadow:0 0 22px -8px var(--sc,var(--grn))}
+.stat .n{font-size:clamp(18px,3.4vw,26px);font-weight:700;color:var(--sc,var(--grn));text-shadow:0 0 12px color-mix(in srgb,var(--sc,#00ff41) 55%,transparent);line-height:1.15}
+.stat .l{font-size:10px;color:var(--mut);letter-spacing:1.4px;margin-top:3px}
+
+/* ---------- toolbar ---------- */
+.bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:12px}
+.btn{
+  font:inherit;font-size:11.5px;letter-spacing:1px;cursor:pointer;
+  background:transparent;color:var(--grn-dim);
+  border:1px solid var(--line-s);padding:7px 11px;
+  transition:.18s ease;position:relative;overflow:hidden;
+}
+.btn:hover,.btn:focus-visible{color:#031007;background:var(--grn);border-color:var(--grn);box-shadow:0 0 16px -3px var(--grn);outline:none}
+.btn.on{color:#031007;background:var(--grn);border-color:var(--grn)}
+.btn.warn.on{background:var(--red);border-color:var(--red);color:#150002;box-shadow:0 0 16px -3px var(--red)}
+.btn.warn:hover{background:var(--red);border-color:var(--red);color:#150002}
+.btn.cy.on,.btn.cy:hover{background:var(--cyan);border-color:var(--cyan);color:#001014}
+.spacer{flex:1 1 auto}
+.hint{font-size:10.5px;color:var(--mut);letter-spacing:.6px}
+
+/* ---------- timetable grid ---------- */
+.gridbox{overflow-x:auto;overflow-y:hidden;padding:0;scrollbar-width:thin;scrollbar-color:var(--grn-dim) transparent}
+.gridbox::-webkit-scrollbar{height:8px}
+.gridbox::-webkit-scrollbar-thumb{background:var(--grn-dim)}
+.gridbox::-webkit-scrollbar-track{background:rgba(0,255,65,.05)}
+.tt{display:grid;grid-template-columns:64px repeat(7,minmax(132px,1fr));min-width:980px}
+.th{
+  height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-bottom:1px solid var(--line-s);border-right:1px solid var(--line);
+  font-size:12px;letter-spacing:1.6px;color:var(--dc,var(--grn));
+  background:linear-gradient(180deg,rgba(0,255,65,.06),transparent);
+}
+.th small{font-size:9px;color:var(--mut);letter-spacing:.8px}
+.th.today{background:linear-gradient(180deg,color-mix(in srgb,var(--dc) 22%,transparent),transparent);box-shadow:inset 0 -2px 0 var(--dc)}
+.th.today small{color:var(--dc)}
+.th.corner{color:var(--mut);letter-spacing:2px;font-size:10px}
+.pcol{border-right:1px solid var(--line-s)}
+.pcell{
+  height:var(--rh);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-bottom:1px solid var(--line);font-size:12px;color:var(--grn-dim);
+}
+.pcell b{font-weight:700;color:var(--grn)}
+.pcell small{font-size:8.5px;color:var(--mut);letter-spacing:.2px}
+.dcol{
+  position:relative;height:calc(var(--rh) * 12);border-right:1px solid var(--line);
+  background:repeating-linear-gradient(180deg,transparent 0 calc(var(--rh) - 1px),var(--line) calc(var(--rh) - 1px) var(--rh));
+}
+.dcol.wknd{background-color:rgba(0,255,65,.022)}
+
+/* ---------- event blocks ---------- */
+.ev{
+  position:absolute;padding:6px 8px;overflow:hidden;cursor:pointer;
+  border:1px solid var(--c);border-left:3px solid var(--c);
+  background:var(--cb);
+  color:var(--c);
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;
+  animation:evIn .4s cubic-bezier(.2,.8,.3,1) both;
+  animation-delay:var(--d,0s);
+  display:flex;flex-direction:column;gap:2px;
+}
+@keyframes evIn{from{opacity:0;transform:translateY(6px) scaleY(.9);transform-origin:top}to{opacity:1;transform:none}}
+.ev:hover,.ev:focus-visible{transform:translateY(-2px);box-shadow:0 0 26px -6px var(--c),0 0 0 1px var(--c) inset;filter:brightness(1.22);z-index:9;outline:none}
+.ev.online{border-left-style:dashed}
+.ev.dim{opacity:.14;filter:grayscale(.7)}
+.ev-h{display:flex;align-items:center;gap:5px;justify-content:space-between}
+.ev-code{font-size:11.5px;font-weight:700;letter-spacing:.6px;text-shadow:0 0 8px currentColor}
+.ev-t{font-size:9px;color:var(--mut);white-space:nowrap}
+.ev-n{font-size:11px;color:var(--txt);line-height:1.28;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ev-f{margin-top:auto;display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:9.5px;color:var(--mut)}
+.ev.sm{padding:4px 6px;gap:0}
+.ev.sm .ev-n{-webkit-line-clamp:1;font-size:9.5px}
+.tag{font-size:8.5px;letter-spacing:.4px;padding:1px 4px;border:1px solid currentColor;line-height:1.4;white-space:nowrap}
+.tag.re{color:var(--red);background:rgba(255,7,58,.12);animation:pulseRe 1.5s ease-in-out infinite}
+.tag.on{color:var(--cyan);background:rgba(0,229,255,.1)}
+@keyframes pulseRe{0%,100%{box-shadow:0 0 0 0 rgba(255,7,58,.5)}50%{box-shadow:0 0 12px 1px rgba(255,7,58,.45)}}
+.ev.clash{animation:evIn .4s both,clash 1s steps(1) infinite .4s;z-index:8}
+@keyframes clash{0%,100%{border-color:var(--red);box-shadow:0 0 22px -6px var(--red),0 0 0 1px var(--red) inset;background:rgba(255,7,58,.22)}50%{border-color:#ff9db1;box-shadow:none;background:rgba(255,7,58,.08)}}
+
+/* ---------- list view ---------- */
+.list{padding:6px}
+.day{border-bottom:1px dashed var(--line);padding:10px 8px}
+.day:last-child{border-bottom:0}
+.day h3{font-size:12px;letter-spacing:2px;color:var(--dc,var(--grn));font-weight:400;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.day h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--dc,var(--grn)),transparent);opacity:.4}
+.row{
+  display:flex;gap:10px;align-items:flex-start;padding:8px 10px;margin-bottom:6px;cursor:pointer;
+  border-left:3px solid var(--c);background:var(--cb);transition:.16s ease;
+}
+.row:hover{transform:translateX(3px);box-shadow:0 0 22px -10px var(--c)}
+.row.dim{opacity:.16}
+.row .tt-time{min-width:74px;font-size:10.5px;color:var(--mut);line-height:1.5}
+.row .tt-time b{display:block;color:var(--c);font-size:12px}
+.row .rmain{flex:1;min-width:0}
+.row .rmain .c{font-size:12px;font-weight:700;color:var(--c)}
+.row .rmain .n{font-size:12px;color:var(--txt)}
+.row .rmain .m{font-size:10px;color:var(--mut);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ---------- legend ---------- */
+.legend{margin-top:14px;padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:7px 16px}
+.lg{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--txt);cursor:pointer;transition:.15s}
+.lg:hover{color:var(--c);transform:translateX(2px)}
+.lg .sw{width:11px;height:11px;flex:none;background:var(--c);box-shadow:0 0 9px var(--c)}
+.lg .cd{color:var(--c);font-weight:700}
+.lg .cr{margin-left:auto;color:var(--mut);font-size:10px}
+
+/* ---------- tooltip ---------- */
+#tip{
+  position:fixed;z-index:60;pointer-events:none;opacity:0;transform:translateY(4px);
+  transition:opacity .13s ease,transform .13s ease;
+  background:rgba(3,10,5,.97);border:1px solid var(--c,var(--grn));
+  box-shadow:0 0 34px -8px var(--c,var(--grn)),0 10px 30px rgba(0,0,0,.7);
+  padding:9px 11px;font-size:11px;white-space:pre;color:var(--txt);max-width:92vw;
+}
+#tip.show{opacity:1;transform:none}
+#tip b{color:var(--c,var(--grn));font-weight:700}
+#tip .k{color:var(--grn-dim)}
+#tip .re{color:var(--red)}
+#tip .on{color:var(--cyan)}
+#tip .fe{color:var(--amber)}
+
+/* ---------- footer ---------- */
+footer{margin-top:16px;padding:14px 16px;font-size:12px}
+.fl{white-space:pre-wrap;word-break:break-word;line-height:1.65}
+.ok{color:var(--grn)}
+.wr{color:var(--amber)}
+.er{color:var(--red)}
+.sig{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-size:10px;color:var(--mut);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* ---------- responsive ---------- */
+@media (max-width:820px){
+  .wrap{padding:14px 10px 46px}
+  body{font-size:13px}
+  :root{--rh:54px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .legend{grid-template-columns:1fr}
+  #tip{left:8px!important;right:8px;max-width:none;width:auto;white-space:pre-wrap;font-size:11px}
+}
+@media (hover:none){
+  .ev:hover,.row:hover{transform:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  #matrix{display:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix" aria-hidden="true"></canvas>
+<div class="scan" aria-hidden="true"></div>
+
+<div id="boot"><div id="bootlog"></div></div>
+
+<div class="wrap" id="capture">
+
+  <header class="panel reveal">
+    <pre class="ascii" aria-label="HUS TKB">██╗  ██╗██╗   ██╗███████╗   ████████╗██╗  ██╗██████╗ 
+██║  ██║██║   ██║██╔════╝   ╚══██╔══╝██║ ██╔╝██╔══██╗
+███████║██║   ██║███████╗      ██║   █████╔╝ ██████╔╝
+██╔══██║██║   ██║╚════██║      ██║   ██╔═██╗ ██╔══██╗
+██║  ██║╚██████╔╝███████║      ██║   ██║  ██╗██████╔╝
+╚═╝  ╚═╝ ╚═════╝ ╚══════╝      ╚═╝   ╚═╝  ╚═╝╚═════╝ </pre>
+    <div class="hbar">
+      <span class="glitch" data-text="TKB SYSTEM v2.0.26">TKB SYSTEM v2.0.26</span>
+      <span class="hmeta">node: <span>hus.vnu.edu.vn</span> · uptime: <span id="uptime">00:00:00</span> · sess: <span>#K69</span></span>
+    </div>
+  </header>
+
+  <section class="panel term reveal" style="animation-delay:.08s">
+    <div class="tline"><span class="prompt">root@hus:<i>~</i>$</span> <span id="c1"></span></div>
+    <div class="tline out" id="o1"></div>
+    <div class="tline" style="margin-top:6px"><span class="prompt">root@hus:<i>~</i>$</span> <span id="c2"></span></div>
+    <div class="tline out" id="o2"></div>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <div class="bar no-export">
+    <button class="btn on" id="fAll" data-f="all">[ ALL ]</button>
+    <button class="btn warn" id="fRe" data-f="retake">[ RETAKE ]</button>
+    <button class="btn cy" id="fOn" data-f="online">[ ONLINE ]</button>
+    <button class="btn" id="fOff" data-f="offline">[ ON-CAMPUS ]</button>
+    <span class="spacer"></span>
+    <button class="btn" id="toggleView">[ VIEW: GRID ]</button>
+    <button class="btn" id="exportBtn">[ EXPORT .PNG ]</button>
+  </div>
+
+  <div class="panel" id="gridPanel">
+    <div class="gridbox" id="gridbox"><div class="tt" id="tt"></div></div>
+  </div>
+
+  <div class="panel list" id="listPanel" style="display:none"></div>
+
+  <section class="panel legend" id="legend"></section>
+
+  <footer class="panel">
+    <div class="fl" id="foot"></div>
+    <div class="sig">
+      <span>PID 24002011 · shell /bin/hackzsh · tty/hus0</span>
+      <span id="sigDate">—</span>
+    </div>
+  </footer>
+
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   1. DATA  —  sửa ở đây là cả trang tự render lại
+   ============================================================ */
+const STUDENT = {
+  name : "Nguyễn Việt Hoàng",
+  user : "nguyenviethoang",
+  id   : "24002011",
+  klass: "K69 KHMT&TT",
+  term : "Học kỳ 1 · Năm học 2026-2027",
+  fee  : "935.800đ",
+  credits: 30
+};
+
+/* d: 2..7 = Thứ 2..Thứ 7, 8 = Chủ Nhật | s,e = tiết bắt đầu / kết thúc */
+const COURSES = [
+  { code:"MAT3507", name:"Cơ sở dữ liệu",                    cr:4, retake:true,  color:"#ff073a", fee:null,
+    slots:[{d:2,s:4,e:6,room:"402T4"},{d:6,s:1,e:3,room:"Phòng Máy"}] },
+  { code:"HIS1056", name:"Cơ sở văn hóa Việt Nam",           cr:3, retake:false, color:"#22d3ee", fee:null,
+    slots:[{d:5,s:7,e:9,room:"Trực tuyến",online:true}] },
+  { code:"MAT1207", name:"Công nghệ phần mềm",               cr:3, retake:false, color:"#ff9d00", fee:null,
+    slots:[{d:4,s:3,e:4,room:"401T4"},{d:8,s:9,e:10,room:"Phòng Máy"}] },
+  { code:"HUS1021", name:"Khoa học trái đất và sự sống",     cr:3, retake:false, color:"#a3e635", fee:null,
+    slots:[{d:5,s:1,e:3,room:"201T5"},{d:8,s:1,e:1,room:"—"}] },
+  { code:"MAT3505", name:"Kiến trúc máy tính",               cr:3, retake:false, color:"#a855f7", fee:null,
+    slots:[{d:6,s:7,e:8,room:"502T3"},{d:7,s:9,e:10,room:"102T5"}] },
+  { code:"HIS1001", name:"Lịch sử Đảng CSVN",                cr:2, retake:true,  color:"#ff073a", fee:"370.800đ",
+    slots:[{d:3,s:9,e:10,room:"Trực tuyến",online:true}] },
+  { code:"MAT3506", name:"Mạng máy tính",                    cr:3, retake:false, color:"#00ff41", fee:null,
+    slots:[{d:2,s:9,e:11,room:"107T5"},{d:2,s:12,e:12,room:"107T5"}] },
+  { code:"MAT3519", name:"Ngôn ngữ lập trình thứ hai",       cr:2, retake:false, color:"#ff2fd0", fee:null,
+    slots:[{d:2,s:7,e:8,room:"202T5"},{d:4,s:10,e:11,room:"Phòng Máy"}] },
+  { code:"THL1057", name:"Nhà nước và pháp luật đại cương",  cr:2, retake:false, color:"#38bdf8", fee:null,
+    slots:[{d:5,s:4,e:5,room:"Trực tuyến",online:true}] },
+  { code:"FLF1107", name:"Tiếng Anh B1",                     cr:5, retake:false, color:"#fbbf24", fee:"565.000đ",
+    slots:[{d:3,s:4,e:6,room:"Trực tuyến",online:true}] }
+];
+
+const DAYS = [
+  {k:2,s:"T2",l:"THỨ HAI",   c:"#00ff41"},
+  {k:3,s:"T3",l:"THỨ BA",    c:"#22d3ee"},
+  {k:4,s:"T4",l:"THỨ TƯ",    c:"#ff9d00"},
+  {k:5,s:"T5",l:"THỨ NĂM",   c:"#a3e635"},
+  {k:6,s:"T6",l:"THỨ SÁU",   c:"#a855f7"},
+  {k:7,s:"T7",l:"THỨ BẢY",   c:"#ff2fd0"},
+  {k:8,s:"CN",l:"CHỦ NHẬT",  c:"#38bdf8"}
+];
+
+/* tiết 1 bắt đầu 07:00, mỗi tiết 50', nghỉ 10' */
+const T0 = 7 * 60, TLEN = 50, TGAP = 10;
+const pStart = n => T0 + (n - 1) * (TLEN + TGAP);
+const hhmm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+const tRange = (s, e) => hhmm(pStart(s)) + "-" + hhmm(pStart(e) + TLEN);
+
+/* ============================================================
+   2. HELPERS
+   ============================================================ */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const el = (t, cls, html) => { const n = document.createElement(t); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+function rgba(hex, a){
+  const h = hex.replace("#",""); const v = parseInt(h.length===3 ? h.split("").map(c=>c+c).join("") : h, 16);
+  return "rgba(" + [(v>>16)&255,(v>>8)&255,v&255].join(",") + "," + a + ")";
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const pad = (s, n) => (s + " ".repeat(n)).slice(0, n);
+
+/* ============================================================
+   3. NORMALISE + CONFLICT SCAN
+   ============================================================ */
+const SLOTS = [];
+COURSES.forEach((c, ci) => c.slots.forEach((s, si) => SLOTS.push({
+  ...s, ci, si, id: ci + "_" + si,
+  online: !!s.online, clash: false, lane: 0, lanes: 1
+})));
+
+let CLASHES = 0;
+DAYS.forEach(d => {
+  const ds = SLOTS.filter(s => s.d === d.k).sort((a, b) => a.s - b.s || a.e - b.e);
+  let group = [], maxEnd = -1;
+  const flush = () => {
+    if (group.length > 1) { CLASHES++; group.forEach((g, i) => { g.clash = true; g.lane = i; g.lanes = group.length; }); }
+    group = [];
+  };
+  ds.forEach(s => {
+    if (group.length && s.s <= maxEnd) { group.push(s); maxEnd = Math.max(maxEnd, s.e); }
+    else { flush(); group = [s]; maxEnd = s.e; }
+  });
+  flush();
+});
+
+const S_ONLINE  = SLOTS.filter(s => s.online).length;
+const C_ONLINE  = COURSES.filter(c => c.slots.every(s => s.online)).length;
+const C_RETAKE  = COURSES.filter(c => c.retake).length;
+const CREDITS   = COURSES.reduce((a, c) => a + c.cr, 0);
+
+/* ============================================================
+   4. RENDER — GRID
+   ============================================================ */
+function buildGrid(){
+  const tt = $("#tt"); tt.innerHTML = "";
+  const todayKey = (new Date().getDay() === 0) ? 8 : new Date().getDay() + 1;
+
+  tt.appendChild(el("div", "th corner", "TIẾT"));
+  DAYS.forEach(d => {
+    const h = el("div", "th" + (d.k === todayKey ? " today" : ""),
+      d.s + "<small>" + d.l + (d.k === todayKey ? " · NOW" : "") + "</small>");
+    h.style.setProperty("--dc", d.c);
+    tt.appendChild(h);
+  });
+
+  const pc = el("div", "pcol");
+  for (let i = 1; i <= 12; i++)
+    pc.appendChild(el("div", "pcell", "<b>" + i + "</b><small>" + hhmm(pStart(i)) + "</small>"));
+  tt.appendChild(pc);
+
+  DAYS.forEach(d => {
+    const col = el("div", "dcol" + (d.k >= 7 ? " wknd" : ""));
+    SLOTS.filter(s => s.d === d.k).forEach((s, idx) => {
+      const c = COURSES[s.ci], span = s.e - s.s + 1;
+      const b = el("div", "ev" + (span === 1 ? " sm" : "") + (s.online ? " online" : "") + (s.clash ? " clash" : ""));
+      b.style.cssText =
+        "--c:" + c.color + ";--cb:" + rgba(c.color, .11) + ";--d:" + (idx * .05 + .12).toFixed(2) + "s;" +
+        "top:calc(" + (s.s - 1) + " * var(--rh) + 3px);" +
+        "height:calc(" + span + " * var(--rh) - 6px);" +
+        "left:calc(" + (s.lane * 100 / s.lanes) + "% + 3px);" +
+        "width:calc(" + (100 / s.lanes) + "% - 6px);";
+      b.tabIndex = 0;
+      b.dataset.slot = s.id;
+
+      const tags =
+        (c.retake ? '<span class="tag re">' + (span >= 3 ? "[RETAKE_REQUIRED]" : span === 2 ? "[RETAKE]" : "[R]") + "</span>" : "") +
+        (s.online ? '<span class="tag on">' + (span >= 2 ? "[ONLINE]" : "[ON]") + "</span>" : "");
+
+      b.innerHTML =
+        '<div class="ev-h"><span class="ev-code">' + c.code + '</span><span class="ev-t">' + (s.s === s.e ? "T" + s.s : "T" + s.s + "-" + s.e) + "</span></div>" +
+        '<div class="ev-n">' + esc(c.name) + "</div>" +
+        (span >= 2
+          ? '<div class="ev-f"><span>⌂ ' + esc(s.room) + "</span>" + tags + (s.clash ? '<span class="tag re">[!CLASH]</span>' : "") + "</div>"
+          : '<div class="ev-f">' + tags + "</div>");
+      col.appendChild(b);
+    });
+    tt.appendChild(col);
+  });
+}
+
+/* ============================================================
+   5. RENDER — LIST
+   ============================================================ */
+function buildList(){
+  const box = $("#listPanel"); box.innerHTML = "";
+  DAYS.forEach(d => {
+    const ds = SLOTS.filter(s => s.d === d.k).sort((a, b) => a.s - b.s);
+    const wrap = el("div", "day");
+    wrap.style.setProperty("--dc", d.c);
+    wrap.appendChild(el("h3", null, d.l + " <span style='color:var(--mut);font-size:10px'>" + ds.length + " slot</span>"));
+    if (!ds.length) wrap.appendChild(el("div", "hint", "  // trống — no scheduled process"));
+    ds.forEach(s => {
+      const c = COURSES[s.ci];
+      const r = el("div", "row" + (s.clash ? " clash" : ""));
+      r.style.cssText = "--c:" + c.color + ";--cb:" + rgba(c.color, .09) + ";";
+      r.tabIndex = 0; r.dataset.slot = s.id;
+      r.innerHTML =
+        '<div class="tt-time"><b>Tiết ' + (s.s === s.e ? s.s : s.s + "-" + s.e) + "</b>" + tRange(s.s, s.e) + "</div>" +
+        '<div class="rmain"><div class="c">' + c.code + ' <span class="n">' + esc(c.name) + "</span></div>" +
+        '<div class="m"><span>⌂ ' + esc(s.room) + "</span><span>" + c.cr + " TC</span>" +
+        (c.retake ? '<span class="tag re">[RETAKE_REQUIRED]</span>' : "") +
+        (s.online ? '<span class="tag on">[ONLINE]</span>' : "") +
+        (s.clash ? '<span class="tag re">[!CLASH]</span>' : "") +
+        (c.fee ? '<span style="color:var(--amber)">' + c.fee + "</span>" : "") +
+        "</div></div>";
+      wrap.appendChild(r);
+    });
+    box.appendChild(wrap);
+  });
+}
+
+/* ============================================================
+   6. STATS + LEGEND
+   ============================================================ */
+function buildStats(){
+  const busiest = DAYS.map(d => ({ d, n: SLOTS.filter(s => s.d === d.k).length })).sort((a, b) => b.n - a.n)[0];
+  const data = [
+    { n: COURSES.length,  l: "MODULES LOADED", c: "#00ff41" },
+    { n: CREDITS,         l: "TỔNG TÍN CHỈ",   c: "#22d3ee" },
+    { n: C_RETAKE,        l: "RETAKE_REQUIRED",c: "#ff073a" },
+    { n: C_ONLINE,        l: "MÔN TRỰC TUYẾN", c: "#38bdf8" },
+    { n: SLOTS.length,    l: "BUỔI / TUẦN",    c: "#a855f7" },
+    { n: CLASHES,         l: "CONFLICTS",      c: CLASHES ? "#ff073a" : "#a3e635" },
+    { n: busiest.d.s,     l: "PEAK LOAD DAY",  c: "#ff2fd0" },
+    { n: STUDENT.fee,     l: "HỌC PHÍ PHẢI NỘP", c: "#ffb800" }
+  ];
+  $("#stats").innerHTML = data.map((s, i) =>
+    '<div class="panel stat reveal" style="--sc:' + s.c + ';animation-delay:' + (.12 + i * .04).toFixed(2) + 's">' +
+    '<div class="n">' + s.n + '</div><div class="l">' + s.l + "</div></div>").join("");
+}
+
+function buildLegend(){
+  $("#legend").innerHTML =
+    '<div class="hint" style="grid-column:1/-1;margin-bottom:2px">// MODULE MAP — click để soi 1 môn</div>' +
+    COURSES.map((c, i) =>
+      '<div class="lg" data-ci="' + i + '" style="--c:' + c.color + '"><span class="sw"></span>' +
+      '<span class="cd">' + c.code + '</span><span>' + esc(c.name) + "</span>" +
+      '<span class="cr">' + c.cr + "TC" + (c.retake ? " ·R" : "") + "</span></div>").join("");
+}
+
+/* ============================================================
+   7. TOOLTIP
+   ============================================================ */
+const tip = $("#tip");
+const coarse = window.matchMedia("(hover:none)").matches;
+
+function tipHTML(s){
+  const c = COURSES[s.ci], d = DAYS.find(x => x.k === s.d);
+  const W = 13;
+  const L = (k, v, cls) => '<span class="k">│ ' + pad(k, 8) + ": </span>" + (cls ? '<span class="' + cls + '">' : "") + esc(v) + (cls ? "</span>" : "");
+  const bar = "─".repeat(Math.max(10, 34 - c.code.length));
+  return "<b>┌─[ " + c.code + " ]" + bar + "</b>\n" +
+    L("MODULE", c.name) + "\n" +
+    L("CREDIT", c.cr + " tín chỉ") + "\n" +
+    L("SLOT", d.l + " · Tiết " + (s.s === s.e ? s.s : s.s + "-" + s.e)) + "\n" +
+    L("TIME", tRange(s.s, s.e)) + "\n" +
+    L("ROOM", s.room, s.online ? "on" : "") + "\n" +
+    L("FEE", c.fee || "đã bao gồm trong gói HK", c.fee ? "fe" : "") + "\n" +
+    L("STATUS", c.retake ? "RETAKE_REQUIRED" : "ENROLLED_OK", c.retake ? "re" : "") +
+    (s.clash ? '\n<span class="re">│ !! TRÙNG LỊCH — CONFLICT DETECTED</span>' : "") +
+    "\n<b>└" + "─".repeat(38) + "</b>";
+}
+
+function showTip(node, ev){
+  const s = SLOTS.find(x => x.id === node.dataset.slot);
+  if (!s) return;
+  tip.style.setProperty("--c", COURSES[s.ci].color);
+  tip.innerHTML = tipHTML(s);
+  tip.classList.add("show");
+  if (coarse){ tip.style.left = "8px"; tip.style.top = ""; tip.style.bottom = "12px"; return; }
+  tip.style.bottom = "";
+  const r = tip.getBoundingClientRect(), b = node.getBoundingClientRect();
+  let x = (ev ? ev.clientX + 16 : b.right + 12), y = (ev ? ev.clientY + 16 : b.top);
+  if (x + r.width > innerWidth - 10)  x = innerWidth - r.width - 10;
+  if (y + r.height > innerHeight - 10) y = innerHeight - r.height - 10;
+  tip.style.left = Math.max(8, x) + "px";
+  tip.style.top  = Math.max(8, y) + "px";
+}
+const hideTip = () => tip.classList.remove("show");
+
+function wireTips(){
+  $$(".ev,.row").forEach(n => {
+    n.addEventListener("mouseenter", e => !coarse && showTip(n, e));
+    n.addEventListener("mousemove",  e => !coarse && tip.classList.contains("show") && showTip(n, e));
+    n.addEventListener("mouseleave", hideTip);
+    n.addEventListener("focus", () => showTip(n));
+    n.addEventListener("blur", hideTip);
+    n.addEventListener("click", e => { e.stopPropagation(); showTip(n, coarse ? null : e); });
+  });
+}
+document.addEventListener("click", hideTip);
+addEventListener("scroll", hideTip, { passive: true });
+
+/* ============================================================
+   8. FILTER + VIEW
+   ============================================================ */
+let filter = "all";
+function applyFilter(){
+  $$(".ev,.row").forEach(n => {
+    const s = SLOTS.find(x => x.id === n.dataset.slot), c = COURSES[s.ci];
+    const hit = filter === "all" || (filter === "retake" && c.retake) ||
+                (filter === "online" && s.online) || (filter === "offline" && !s.online) ||
+                (filter.startsWith("ci") && +filter.slice(2) === s.ci);
+    n.classList.toggle("dim", !hit);
+  });
+}
+$$(".bar .btn[data-f]").forEach(b => b.addEventListener("click", () => {
+  $$(".bar .btn[data-f]").forEach(x => x.classList.remove("on"));
+  b.classList.add("on"); filter = b.dataset.f; applyFilter();
+}));
+
+let view = innerWidth < 780 ? "list" : "grid";
+function applyView(){
+  $("#gridPanel").style.display = view === "grid" ? "" : "none";
+  $("#listPanel").style.display = view === "list" ? "" : "none";
+  $("#toggleView").textContent = "[ VIEW: " + view.toUpperCase() + " ]";
+}
+$("#toggleView").addEventListener("click", () => { view = view === "grid" ? "list" : "grid"; applyView(); hideTip(); });
+
+/* ============================================================
+   9. TERMINAL TYPING
+   ============================================================ */
+function typeInto(node, text, speed){
+  return new Promise(res => {
+    let i = 0; node.textContent = "";
+    const car = el("span", "caret", "&nbsp;"); node.after(car);
+    const tick = () => {
+      node.textContent += text[i++];
+      if (i < text.length) setTimeout(tick, speed);
+      else { car.remove(); res(); }
+    };
+    setTimeout(tick, speed);
+  });
+}
+
+async function runTerminal(){
+  await typeInto($("#c1"), "whoami --verbose", 34);
+  $("#o1").innerHTML =
+    '<span class="v">' + esc(STUDENT.name.toUpperCase()) + '</span> <span class="k">(uid=' + STUDENT.id + ', gid=' + esc(STUDENT.klass) + ', groups=hus,khmt,tt)</span>';
+  await new Promise(r => setTimeout(r, 260));
+  await typeInto($("#c2"), "cat student_info.txt", 34);
+  $("#o2").innerHTML = [
+    '<span class="k">MSSV     :</span> <span class="v">' + STUDENT.id + "</span>",
+    '<span class="k">LỚP      :</span> <span class="v">' + esc(STUDENT.klass) + "</span>",
+    '<span class="k">HỌC KỲ   :</span> <span class="v">' + esc(STUDENT.term) + "</span>",
+    '<span class="k">TÍN CHỈ  :</span> <span class="v">' + CREDITS + " TC</span> <span class=\"k\">/</span> " + COURSES.length + " môn",
+    '<span class="k">HỌC PHÍ  :</span> <span class="hot">' + STUDENT.fee + "</span>",
+    '<span class="k">CẢNH BÁO :</span> <span style="color:var(--red)">' + C_RETAKE + " môn HỌC LẠI — RETAKE_REQUIRED</span>"
+  ].join("\n");
+  runFooter();
+}
+
+function runFooter(){
+  const dot = n => ".".repeat(Math.max(2, n));
+  const lines = [
+    '<span class="prompt">root@hus:<i>~</i>$</span> ./confirm_tkb.sh --sem=1 --year=2026-2027',
+    '<span class="ok">[ OK ]</span> parsing schedule.dat ' + dot(18) + " <span class=\"ok\">" + SLOTS.length + " slots</span>",
+    '<span class="ok">[ OK ]</span> mapping rooms ' + dot(26) + ' <span class="ok">7 days indexed</span>',
+    '<span class="' + (CLASHES ? "er" : "ok") + '">[' + (CLASHES ? "FAIL" : " OK ") + ']</span> conflict matrix scan ' + dot(18) + ' <span class="' + (CLASHES ? "er" : "ok") + '">' + CLASHES + " collisions</span>",
+    '<span class="wr">[WARN]</span> retake modules detected ' + dot(15) + ' <span class="er">' + C_RETAKE + " (MAT3507, HIS1001)</span>",
+    '<span class="wr">[WARN]</span> outstanding balance ' + dot(19) + ' <span class="wr">' + STUDENT.fee + "</span>",
+    '<span class="ok">[SUCCESS]</span> <span class="ok">' + CREDITS + " credits loaded.</span>",
+    '<span class="prompt">root@hus:<i>~</i>$</span> <span class="caret">&nbsp;</span>'
+  ];
+  const f = $("#foot"); f.innerHTML = "";
+  lines.forEach((l, i) => setTimeout(() => {
+    const d = el("div", null, l);
+    d.style.animation = "fadeUp .3s both";
+    f.appendChild(d);
+  }, 170 * i));
+}
+
+/* ============================================================
+   10. MATRIX RAIN
+   ============================================================ */
+(function matrix(){
+  const cv = $("#matrix"), ctx = cv.getContext("2d", { alpha: false });
+  const CH = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロン0123456789<>[]{}/\\|=+*#$%HUSTKB".split("");
+  let cols = [], w = 0, h = 0, sz = 15;
+  function fit(){
+    w = cv.width = innerWidth; h = cv.height = innerHeight;
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, h);
+    const n = Math.ceil(w / sz);
+    cols = Array.from({ length: n }, (_, i) => cols[i] != null ? cols[i] : Math.random() * -60);
+  }
+  let last = 0;
+  function draw(t){
+    requestAnimationFrame(draw);
+    if (document.hidden || t - last < 45) return;
+    last = t;
+    ctx.fillStyle = "rgba(0,0,0,.075)"; ctx.fillRect(0, 0, w, h);
+    ctx.font = "700 " + sz + "px " + getComputedStyle(document.body).fontFamily;
+    for (let i = 0; i < cols.length; i++){
+      const y = cols[i] * sz;
+      const c = CH[(Math.random() * CH.length) | 0];
+      ctx.fillStyle = Math.random() > .985 ? "#dfffe8" : (Math.random() > .96 ? "#00e5ff" : "#00ff41");
+      ctx.fillText(c, i * sz, y);
+      if (y > h && Math.random() > .972) cols[i] = 0; else cols[i]++;
+    }
+  }
+  addEventListener("resize", fit, { passive: true });
+  fit(); requestAnimationFrame(draw);
+})();
+
+/* ============================================================
+   11. EXPORT PNG  (SVG foreignObject → canvas, no CDN)
+   ============================================================ */
+async function exportPNG(){
+  const btn = $("#exportBtn"), old = btn.textContent;
+  btn.textContent = "[ RENDERING... ]"; btn.disabled = true;
+  hideTip();
+  try{
+    const node = $("#capture");
+    const W = Math.ceil(Math.max(node.scrollWidth, node.getBoundingClientRect().width));
+    const H = Math.ceil(node.scrollHeight) + 8;
+    const clone = node.cloneNode(true);
+    clone.querySelectorAll(".no-export").forEach(n => n.remove());
+    clone.querySelectorAll(".gridbox").forEach(n => { n.style.overflow = "visible"; });
+    clone.style.width = W + "px"; clone.style.margin = "0"; clone.style.padding = "18px";
+
+    const patch = `
+      *{animation:none!important;transition:none!important;backdrop-filter:none!important}
+      .ascii{color:#00ff41!important;-webkit-text-fill-color:#00ff41!important;background:none!important;filter:none!important}
+      .glitch::before,.glitch::after{display:none!important}
+      .ev.clash{border-color:#ff073a!important;background:rgba(255,7,58,.2)!important}
+      .caret{display:none!important}
+      body,#capture{background:#0a0a0a!important}
+    `;
+    const css = $("#app-css").textContent + patch;
+    const xml = new XMLSerializer().serializeToString(clone);
+    const scale = Math.min(2, Math.max(1, 2200 / W));
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="' + Math.round(W * scale) + '" height="' + Math.round(H * scale) + '" viewBox="0 0 ' + W + " " + H + '">' +
+      '<rect width="100%" height="100%" fill="#0a0a0a"/>' +
+      '<foreignObject x="0" y="0" width="100%" height="100%">' +
+      '<div xmlns="http://www.w3.org/1999/xhtml" style="width:' + W + 'px;background:#0a0a0a">' +
+      "<style><![CDATA[" + css + "]]></style>" + xml + "</div></foreignObject></svg>";
+
+    const img = new Image();
+    img.decoding = "sync";
+    await new Promise((res, rej) => {
+      img.onload = res; img.onerror = () => rej(new Error("svg-load"));
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    });
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(W * scale); cv.height = Math.round(H * scale);
+    const cx = cv.getContext("2d");
+    cx.fillStyle = "#0a0a0a"; cx.fillRect(0, 0, cv.width, cv.height);
+    cx.drawImage(img, 0, 0, cv.width, cv.height);
+    const a = document.createElement("a");
+    a.download = "TKB_" + STUDENT.id + "_HK1_2026-2027.png";
+    a.href = cv.toDataURL("image/png");
+    a.click();
+    btn.textContent = "[ SAVED ✓ ]";
+  }catch(err){
+    console.error(err);
+    btn.textContent = "[ FAILED — DÙNG CTRL+P ]";
+    const f = $("#foot");
+    if (f) f.appendChild(el("div", null, '<span class="er">[ERROR]</span> export_png(): renderer từ chối — thử Chrome hoặc Ctrl+P → Save as PDF.'));
+  }finally{
+    btn.disabled = false;
+    setTimeout(() => btn.textContent = old, 2600);
+  }
+}
+$("#exportBtn").addEventListener("click", exportPNG);
+
+/* ============================================================
+   12. BOOT SEQUENCE + INIT
+   ============================================================ */
+function boot(){
+  const log = $("#bootlog");
+  const seq = [
+    "HUS BIOS v2.0.26 ... <b>OK</b>",
+    "mount /dev/vnu/hus ... <b>OK</b>",
+    "auth uid=24002011 ... <b>GRANTED</b>",
+    "load schedule.dat [" + SLOTS.length + " slots / " + CREDITS + " TC] ... <b>OK</b>",
+    "starting tkb_render ... <b>DONE</b>"
+  ];
+  seq.forEach((l, i) => setTimeout(() => { log.innerHTML += "> " + l + "\n"; }, i * 150));
+  const kill = () => $("#boot").classList.add("off");
+  setTimeout(kill, seq.length * 150 + 380);
+  $("#boot").addEventListener("click", kill);
+}
+
+function uptime(){
+  const t0 = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    $("#uptime").textContent = [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60]
+      .map(v => String(v).padStart(2, "0")).join(":");
+  }, 1000);
+}
+
+function init(){
+  buildGrid(); buildList(); buildStats(); buildLegend();
+  applyView(); wireTips(); uptime();
+  $("#sigDate").textContent = "build " + new Date().toLocaleString("vi-VN");
+  $$("#legend .lg").forEach(n => n.addEventListener("click", () => {
+    const f = "ci" + n.dataset.ci;
+    filter = (filter === f) ? "all" : f;
+    $$(".bar .btn[data-f]").forEach(x => x.classList.toggle("on", filter === "all" && x.dataset.f === "all"));
+    applyFilter();
+  }));
+  addEventListener("keydown", e => {
+    if (e.key === "Escape") { filter = "all"; applyFilter(); hideTip(); }
+    if (e.key.toLowerCase() === "v") { view = view === "grid" ? "list" : "grid"; applyView(); }
+  });
+  boot();
+  setTimeout(runTerminal, 900);
+}
+document.readyState === "loading" ? addEventListener("DOMContentLoaded", init) : init();
+</script>
+</body>
+</html>
